@@ -1,4 +1,5 @@
 from pkgutil import extend_path
+from urllib import response
 from flask import jsonify, render_template, request,json
 from sqlalchemy.sql import exists
 from .models import db, Book
@@ -51,27 +52,59 @@ def configure_routes(app):
             db.session.add(new_book)
             db.session.commit()
             book_id = new_book._id
-            return books_by_id(book_id)
+            book = Book.query.get(book_id)
+            if book.authors:
+                authors = book.authors.split(', ')
+            else:
+                authors = []
+            book_json = jsonify({'id': book._id,
+                        'external_id': book.external_id,
+                        'title': book.title,
+                        'authors': authors,
+                        'acquired': book.acquired,
+                        'published_year': book.published_year,
+                        'thumbnail': book.thumbnail
+                        })
+            return book_json
+            
 
 
-    @app.route('/books/<int:id>', methods=['GET', 'PATCH', 'DELETE'])
-    def books_by_id(id):
-        book = Book.query.get(id)
-        if book.authors:
-            authors = book.authors.split(', ')
-        else:
-            authors = []
-        book_json = jsonify({'id': book._id,
-                    'external_id': book.external_id,
-                    'title': book.title,
-                    'authors': authors,
-                    'acquired': book.acquired,
-                    'published_year': book.published_year,
-                    'thumbnail': book.thumbnail
-                    })
-        return book_json
+    @app.route('/books/<int:_id>', methods=['GET'])
+    def get_books_by_id(_id):
+        if request.method == 'GET':
+            book = Book.query.get(_id)
+            if book.authors:
+                authors = book.authors.split(', ')
+            else:
+                authors = []
+            book_json = jsonify({'id': book._id,
+                        'external_id': book.external_id,
+                        'title': book.title,
+                        'authors': authors,
+                        'acquired': book.acquired,
+                        'published_year': book.published_year,
+                        'thumbnail': book.thumbnail
+                        })
+            return book_json
 
     #PATCH /books/123
+    @app.route('/books/<int:_id>', methods=['PATCH'])
+    def patch_books_by_id(_id):
+        if request.method == 'PATCH':
+            pass
+    
 
     #DELETE /books/123
+    @app.route('/books/<int:_id>', methods=['DELETE'])
+    def delete_books_by_id(_id):
+        if request.method == 'DELETE':
+            book = Book.query.get(_id)
+            if book:
+                db.session.delete(book)
+                db.session.commit()
+                response = {'info': 'Book deleted'}
+            else:
+                response = {'info': 'This book is not stored in database'}
+            return response
+
 
