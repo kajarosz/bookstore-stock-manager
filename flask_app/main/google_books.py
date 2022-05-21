@@ -6,7 +6,6 @@ max_results = 40
 no_of_requests = f'&maxResults={max_results}'
 
 def import_books_by_author(author):
-    #url = google_books_api + author
     start_index = f'&startIndex=0'
     response = request_books_details(author, start_index)
     total_items = response.get('totalItems')
@@ -36,16 +35,16 @@ def extract_books_details(response):
             authors = ', '.join(details.get('authors'))
         else:
             authors = None
-        aquired = False
+        acquired = False
         if details.get('publishedDate'):
             published_year = details.get('publishedDate')[:4]
         else:
             published_year = None
-        thumbnail = details.get('previewLink')
+        thumbnail = f'http://books.google.com/books/content?id={external_id}&printsec=frontcover&img=1&zoom=1&source=gbs_api%22'
         book = {'external_id': external_id,
         'title': title,
         'authors': authors,
-        'aquired': aquired,
+        'acquired': acquired,
         'published_year': published_year,
         'thumbnail': thumbnail
         }
