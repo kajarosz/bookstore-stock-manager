@@ -1,6 +1,4 @@
-from pkgutil import extend_path
-from urllib import response
-from flask import jsonify, render_template, request,json
+from flask import jsonify, request
 from sqlalchemy.sql import exists
 from .models import db, Book
 from .google_books import import_books_by_author
@@ -29,13 +27,12 @@ def configure_routes(app):
             return response
     
    #GET /books?author="Tolkien"&from=2003&to=2022&acquired=false
-
     @app.route('/books',  methods=['GET'])
     def books_get():
         if request.method == 'GET':
             pass
 
-    @app.route('/books',  methods=['POST'])
+    @app.route('/books', methods=['POST'])
     def books_post():
         if request.method == 'POST':
             if request.json['authors']:
@@ -66,8 +63,6 @@ def configure_routes(app):
                         'thumbnail': book.thumbnail
                         })
             return book_json
-            
-
 
     @app.route('/books/<int:_id>', methods=['GET'])
     def get_books_by_id(_id):
@@ -87,14 +82,27 @@ def configure_routes(app):
                         })
             return book_json
 
-    #PATCH /books/123
     @app.route('/books/<int:_id>', methods=['PATCH'])
     def patch_books_by_id(_id):
         if request.method == 'PATCH':
-            pass
-    
+            book = Book.query.get(_id)
+            updates = request.json
+            db.session.query(Book).filter(Book._id).update(updates)
+            db.session.commit()
+            if book.authors:
+                authors = book.authors.split(', ')
+            else:
+                authors = []
+            book_json = jsonify({'id': book._id,
+                        'external_id': book.external_id,
+                        'title': book.title,
+                        'authors': authors,
+                        'acquired': book.acquired,
+                        'published_year': book.published_year,
+                        'thumbnail': book.thumbnail
+                        })
+            return book_json
 
-    #DELETE /books/123
     @app.route('/books/<int:_id>', methods=['DELETE'])
     def delete_books_by_id(_id):
         if request.method == 'DELETE':
