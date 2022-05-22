@@ -17,7 +17,7 @@ def import_books_by_author(author):
             response = request_books_details(author, start_index)
         books_batch = extract_books_details(response)
         books.extend(books_batch)
-    return total_items, books
+    return books
 
 def request_books_details(author, start_index):
     url = google_books_api + author + start_index +  no_of_requests
