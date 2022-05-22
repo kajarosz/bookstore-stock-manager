@@ -93,7 +93,7 @@ def configure_routes(app):
                 authors = book.authors.split(', ')
             else:
                 authors = []
-            book_json = {'id': book._id,
+            book_details = {'id': book._id,
                         'external_id': book.external_id,
                         'title': book.title,
                         'authors': authors,
@@ -101,7 +101,7 @@ def configure_routes(app):
                         'published_year': book.published_year,
                         'thumbnail': book.thumbnail
                         }
-            return book_json
+            return book_details
 
     @app.route('/books/<int:_id>', methods=['GET'])
     def get_books_by_id(_id):
@@ -111,15 +111,15 @@ def configure_routes(app):
                 authors = book.authors.split(', ')
             else:
                 authors = []
-            book_json = jsonify({'id': book._id,
+            book_details = {'id': book._id,
                         'external_id': book.external_id,
                         'title': book.title,
                         'authors': authors,
                         'acquired': book.acquired,
                         'published_year': book.published_year,
                         'thumbnail': book.thumbnail
-                        })
-            return book_json
+                        }
+            return book_details
 
     @app.route('/books/<int:_id>', methods=['PATCH'])
     def patch_books_by_id(_id):
@@ -132,15 +132,15 @@ def configure_routes(app):
                 authors = book.authors.split(', ')
             else:
                 authors = []
-            book_json = jsonify({'id': book._id,
+            book_details = {'id': book._id,
                         'external_id': book.external_id,
                         'title': book.title,
                         'authors': authors,
                         'acquired': book.acquired,
                         'published_year': book.published_year,
                         'thumbnail': book.thumbnail
-                        })
-            return book_json
+                        }
+            return book_details
 
     @app.route('/books/<int:_id>', methods=['DELETE'])
     def delete_books_by_id(_id):
