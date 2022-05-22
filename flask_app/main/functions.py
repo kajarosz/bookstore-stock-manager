@@ -1,5 +1,11 @@
 from .models import Book
 
+class FunctionException(Exception):
+    status_code = 400
+
+    def __init__(self, message):
+        self.message = {'error': message}
+
 def jsonify_object(book):
     if book.authors:
         authors = book.authors.split(', ')

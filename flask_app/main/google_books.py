@@ -1,7 +1,10 @@
 import requests, math
 
 class ApiRequestException(Exception):
-    pass
+    status_code = 400
+
+    def __init__(self, message):
+        self.message = {'error': message}
 
 google_books_api = 'https://www.googleapis.com/books/v1/volumes?q=inauthor:'
 max_results = 40
@@ -24,8 +27,9 @@ def request_books_details(author, start_index='&startIndex=0'):
     url = google_books_api + author + start_index + no_of_requests
     try:
         response = requests.get(url).json()
-    except ApiRequestException:
-        response = {'info': 'Unknown Google Books API error.'}
+    except:
+        message = 'Unknown Google Books API error.'
+        raise ApiRequestException(message)
     return response
     
 def extract_books_details(response):
