@@ -6,6 +6,10 @@ from .functions import jsonify_object, query_string_filter, request_to_dict
 
 def configure_routes(app):
 
+    @app.errorhandler(Exception)
+    def exception_raised(error):
+        return jsonify(error.message), error.status_code
+
     @app.route('/api_spec', methods=['GET'])
     def api_spec():
         response = {"info": {"version": "2022.05.16"}}
