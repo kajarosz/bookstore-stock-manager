@@ -1,5 +1,6 @@
 from flask import jsonify, request
 from sqlalchemy.sql import exists
+from datetime import date
 from .models import db, Book
 from .google_books import import_books_by_author
 
@@ -26,11 +27,49 @@ def configure_routes(app):
             response = {"imported": str(books_count)}
             return response
     
-   #GET /books?author="Tolkien"&from=2003&to=2022&acquired=false
-    @app.route('/books',  methods=['GET'])
+    @app.route('/books', methods=['GET'])
     def books_get():
         if request.method == 'GET':
-            pass
+            args = request.args
+            filters = args.to_dict()
+            keys = filters.keys()
+            filtered = Book.query.all()
+            if 'author' in keys:
+                filtered = list(filter(lambda Book: filters['author'] in str(Book.authors), filtered))
+            if 'title' in keys:
+                filtered = list(filter(lambda Book: filters['title'] in str(Book.title), filtered))
+            if 'acquired' in keys:
+                if filters['acquired'] == 'true':
+                    filters['acquired'] = True
+                else:
+                    filters['acquired'] = False
+                filtered = list(filter(lambda Book: Book.acquired == filters['acquired'], filtered))
+            if 'from' in keys:
+                if 'to' in keys:
+                    filtered = list(filter(lambda Book: Book.published_year >= filters['from'], filtered))
+                    filtered = list(filter(lambda Book: Book.published_year <= filters['to'], filtered))
+                else:
+                    filtered = list(filter(lambda Book: Book.published_year >= filters['from'], filtered))
+            elif 'to' in keys:
+                filtered = list(filter(lambda Book: Book.published_year <= filters['to'], filtered))
+            print(filtered)
+            print(filtered)
+            books = []
+            for book in filtered:
+                if book.authors:
+                    authors = book.authors.split(', ')
+                else:
+                    authors = []
+                book_details = {'id': book._id,
+                            'external_id': book.external_id,
+                            'title': book.title,
+                            'authors': authors,
+                            'acquired': book.acquired,
+                            'published_year': book.published_year,
+                            'thumbnail': book.thumbnail
+                            }
+                books.append(book_details)
+            return jsonify(books)
 
     @app.route('/books', methods=['POST'])
     def books_post():
@@ -54,14 +93,14 @@ def configure_routes(app):
                 authors = book.authors.split(', ')
             else:
                 authors = []
-            book_json = jsonify({'id': book._id,
+            book_json = {'id': book._id,
                         'external_id': book.external_id,
                         'title': book.title,
                         'authors': authors,
                         'acquired': book.acquired,
                         'published_year': book.published_year,
                         'thumbnail': book.thumbnail
-                        })
+                        }
             return book_json
 
     @app.route('/books/<int:_id>', methods=['GET'])
