@@ -17,7 +17,7 @@ def jsonify_object(book):
 
 def request_to_dict(request):
     if request.json['authors']:
-                authors = ', '.join(request.json['authors'])
+        authors = ', '.join(request.json['authors'])
     else:
         authors = None
     book_dict = {'external_id': request.json['external_id'],

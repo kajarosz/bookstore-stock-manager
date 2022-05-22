@@ -1,6 +1,5 @@
 from flask import jsonify, request
 from sqlalchemy.sql import exists
-from datetime import date
 from .models import db, Book
 from .google_books import import_books_by_author
 from .functions import jsonify_object, query_string_filter, request_to_dict

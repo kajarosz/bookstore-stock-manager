@@ -1,13 +1,14 @@
 import requests, math
 
+class ApiRequestException(Exception):
+    pass
+
 google_books_api = 'https://www.googleapis.com/books/v1/volumes?q=inauthor:'
-start_index = f'&startIndex=0'
 max_results = 40
 no_of_requests = f'&maxResults={max_results}'
 
 def import_books_by_author(author):
-    start_index = f'&startIndex=0'
-    response = request_books_details(author, start_index)
+    response = request_books_details(author)
     total_items = response.get('totalItems')
     no_of_requests = math.ceil(total_items / max_results)
     books = []
@@ -19,9 +20,12 @@ def import_books_by_author(author):
         books.extend(books_batch)
     return books
 
-def request_books_details(author, start_index):
-    url = google_books_api + author + start_index +  no_of_requests
-    response = requests.get(url).json()
+def request_books_details(author, start_index='&startIndex=0'):
+    url = google_books_api + author + start_index + no_of_requests
+    try:
+        response = requests.get(url).json()
+    except ApiRequestException:
+        response = {'info': 'Unknown Google Books API error.'}
     return response
     
 def extract_books_details(response):
