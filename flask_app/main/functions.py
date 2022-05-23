@@ -1,8 +1,10 @@
 from .models import Book
 from .exceptions import FunctionException
 
+# JSONify book object
 def jsonify_object(book):
     try:
+        # Split authors string into list
         if book.authors:
             authors = book.authors.split(', ')
         else:
@@ -20,42 +22,46 @@ def jsonify_object(book):
         raise FunctionException(message)
     return book_details
 
-# czy to jest napewno potrzebne?
+# Process request into dictionary
 def request_to_dict(request):
     try:
+        # Split authors string into list
         if request.json['authors']:
             authors = ', '.join(request.json['authors'])
         else:
             authors = None
-        book_dict = {'external_id': request.json['external_id'],
-            'title': request.json['title'],
-            'authors': authors,
-            'acquired': request.json['acquired'],
-            'published_year': request.json['published_year'],
-            'thumbnail': request.json['thumbnail']}
+        book_dict = request.json
+        book_dict.update({'authors': authors})
     except:
         message = 'Error occured while parsing request into JSON format.'
         raise FunctionException(message)
     return book_dict
 
+# Filter all books query by string query arguments
 def query_string_filter(filters):
+    # get filter keys
     keys = filters.keys()
+    # query all books
     try:
         filtered_books = Book.query.all()
     except:
         message = 'Error occured while querying book list from database.'
         raise FunctionException(message)
     try:
+        # filter by author
         if 'author' in keys:
             filtered_books = list(filter(lambda Book: filters['author'] in str(Book.authors), filtered_books))
+        # filter by title
         if 'title' in keys:
             filtered_books = list(filter(lambda Book: filters['title'] in str(Book.title), filtered_books))
+        # filter by acquired status
         if 'acquired' in keys:
             if filters['acquired'] == 'true':
                 filters['acquired'] = True
             else:
                 filters['acquired'] = False
             filtered_books = list(filter(lambda Book: Book.acquired == filters['acquired'], filtered_books))
+        # filter by published date
         if 'from' in keys:
             if 'to' in keys:
                 filtered_books = list(filter(lambda Book: Book.published_year >= filters['from'], filtered_books))
