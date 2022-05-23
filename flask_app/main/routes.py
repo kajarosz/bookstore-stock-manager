@@ -3,12 +3,22 @@ from sqlalchemy.sql import exists
 from .models import db, Book
 from .google_books import import_books_by_author
 from .functions import jsonify_object, query_string_filter, request_to_dict
+from .exceptions import GeneralException, RoutingException
+
 
 def configure_routes(app):
 
-    @app.errorhandler(Exception)
-    def exception_raised(error):
-        return jsonify(error.message), error.status_code
+    @app.errorhandler(GeneralException)
+    def exception_raised(e):
+        return jsonify(e.message), e.status_code
+
+    @app.errorhandler(404)
+    def resource_not_found(e):
+        return jsonify(error=str(e)), 404
+    
+    @app.errorhandler(405)
+    def method_not_allowed(e):
+        return jsonify(error=str(e)), 405
 
     @app.route('/api_spec', methods=['GET'])
     def api_spec():
@@ -20,22 +30,30 @@ def configure_routes(app):
         if request.method == 'POST':
             author = request.json['author']
             imported_books = import_books_by_author(author)
-            books_list = imported_books          
             books_count = 0
-            for book in books_list:
-                if not db.session.query(exists().where(Book.external_id == book['external_id'])).scalar():
-                    new_book = Book(**book)
-                    db.session.add(new_book)
-                    db.session.commit()
-                    books_count += 1
+            if imported_books:
+                try:          
+                    for book in imported_books:
+                        if not db.session.query(exists().where(Book.external_id == book['external_id'])).scalar():
+                            new_book = Book(**book)
+                            db.session.add(new_book)
+                            db.session.commit()
+                            books_count += 1
+                except:
+                        message = 'Error occured while adding book to database.'
+                        raise RoutingException(message)
             response = {"imported": str(books_count)}
             return response
     
     @app.route('/books', methods=['GET'])
     def books_get():
         if request.method == 'GET':
-            args = request.args
-            filters = args.to_dict()
+            try:
+                args = request.args
+                filters = args.to_dict()
+            except:
+                message = 'Error occured while accessing query string arguments.'
+                raise RoutingException(message)
             filtered_books = query_string_filter(filters)
             books = []
             for book in filtered_books:
@@ -59,8 +77,13 @@ def configure_routes(app):
     def get_books_by_id(_id):
         if request.method == 'GET':
             book = Book.query.get(_id)
-            book_details = jsonify_object(book)
-            return book_details
+            if book:
+                book_details = jsonify_object(book)
+                return book_details
+            else:
+                response = {'info': 'This book was deleted from database.'}
+                return response
+            
 
     @app.route('/books/<int:_id>', methods=['PATCH'])
     def patch_books_by_id(_id):
@@ -81,7 +104,5 @@ def configure_routes(app):
                 db.session.commit()
                 response = {'info': 'Book deleted'}
             else:
-                response = {'info': 'This book is not stored in database'}
+                response = {'info': 'This book was deleted from database.'}
             return response
-
-
