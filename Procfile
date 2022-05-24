@@ -1,1 +1,1 @@
-web: gunicorn app:flask_app/run_app
+web: gunicorn wsgi:app
