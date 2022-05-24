@@ -44,23 +44,33 @@ def configure_routes(app):
             # create imported books counter
             imported_books_count = 0
             updated_books_count = 0
-            if imported_books:
-                try:          
+            if imported_books:     
                     for book in imported_books:
                         # based on external ID, check if book exists in database
                         # if no: add new book
                         if not db.session.query(exists().where(Book.external_id == book['external_id'])).scalar():
-                            new_book = Book(**book)
-                            db.session.add(new_book)
-                            db.session.commit()
-                            imported_books_count += 1
+                            try:
+                                new_book = Book(**book)
+                                db.session.add(new_book)
+                                db.session.commit()
+                                imported_books_count += 1
+                            except:
+                                message = 'Error occured while adding book to database.'
+                                raise RoutingException(message)
                         # if yes: update book details 
                         else:
-                            pass
-                            updated_books_count += 1
-                except:
-                        message = 'Error occured while adding book to database.'
-                        raise RoutingException(message)
+                            try:
+                                # remove external_id key-value pair for dict
+                                # because it is existing unique value
+                                external_id = book['external_id']
+                                book.pop('external_id')
+                                # update book details
+                                db.session.query(Book).filter(Book.external_id == external_id).update(book)
+                                db.session.commit()
+                                updated_books_count += 1
+                            except:
+                                message = 'Error occured while updating book in database.'
+                                raise RoutingException(message)
             response = {'imported': str(imported_books_count),
                             'updated': str(updated_books_count)}
             return response
@@ -125,7 +135,7 @@ def configure_routes(app):
             # JSONify request details
             updates = request.json
             # update book details
-            db.session.query(Book).filter(Book._id).update(updates)
+            db.session.query(Book).filter(Book._id == _id).update(updates)
             db.session.commit()
             book_details = jsonify_object(book)
             return book_details
