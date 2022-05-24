@@ -17,9 +17,9 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 configure_routes(app)
 
+db.init_app(app)
+
 if __name__ == '__main__':
-    #if ENV == 'dev':
-    db.init_app(app)
     with app.app_context():
         db.create_all()
     app.run()
