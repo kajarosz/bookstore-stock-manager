@@ -37,8 +37,7 @@ def import_books_by_author(author):
             if i != 0:
                 start_index = f'&startIndex={i*max_results}'
                 response = request_books_details(author, start_index)
-            books_batch = extract_books_details(response)
-            books.extend(books_batch)
+                books_batch = extract_books_details(response)
         return books
 
 # Importing books from Google Books API

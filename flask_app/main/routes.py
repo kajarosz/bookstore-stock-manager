@@ -43,7 +43,6 @@ def configure_routes(app):
             imported_books = import_books_by_author(author)
             # create imported books counter
             imported_books_count = 0
-            updated_books_count = 0
             if imported_books:     
                     for book in imported_books:
                         # based on external ID, check if book exists in database
@@ -67,12 +66,11 @@ def configure_routes(app):
                                 # update book details
                                 db.session.query(Book).filter(Book.external_id == external_id).update(book)
                                 db.session.commit()
-                                updated_books_count += 1
+                                imported_books_count += 1
                             except:
                                 message = 'Error occured while updating book in database.'
                                 raise RoutingException(message)
-            response = {'imported': str(imported_books_count),
-                            'updated': str(updated_books_count)}
+            response = {'imported': str(imported_books_count)}
             return response
     
     # getting the list of books from the database
