@@ -68,6 +68,13 @@ python run_app.py
 ```
 
 
+### How to run tests?
+
+In project directory run:
+```
+pytest
+```
+
 ### Public APIs used in the project
 
 *https://developers.google.com/books/docs/v1/using*
