@@ -51,6 +51,9 @@ def request_books_details(author, start_index='&startIndex=0'):
     except:
         message = 'Unknown Google Books API error.'
         raise ApiRequestException(message)
+    if 'kind' not in response:
+        message = 'URL error'
+        raise ApiRequestException(message)
     return response
 
 # Importing books from Google Books API
@@ -63,9 +66,9 @@ def extract_books_details(response):
         message = 'No items were found.'
         raise ApiRequestException(message)
     books_batch = []
-    for item in items:
+    try:
+        for item in items:
         # get and process books details
-        try:
             external_id = item.get('id')
             details = item.get('volumeInfo')
             title = details.get('title')
@@ -78,9 +81,7 @@ def extract_books_details(response):
                 published_year = details.get('publishedDate')[:4]
             else:
                 published_year = None
-        except:
-            message = 'Error occured while collecting item data.'
-            raise ApiRequestException(message)
+            
         thumbnail = f'http://books.google.com/books/content?id={external_id}&printsec=frontcover&img=1&zoom=1&source=gbs_api%22'
         # create book details dictionary
         book = {'external_id': external_id,
@@ -90,5 +91,8 @@ def extract_books_details(response):
         'published_year': published_year,
         'thumbnail': thumbnail
         }
-        books_batch.append(book)
+    except:
+        message = 'Error occured while collecting item data.'
+        raise ApiRequestException(message)
+    books_batch.append(book)
     return books_batch
