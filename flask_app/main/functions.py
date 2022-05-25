@@ -40,7 +40,11 @@ def request_to_dict(request):
 # Filter all books query by string query arguments
 def query_string_filter(filters):
     # get filter keys
-    keys = filters.keys()
+    try:
+        keys = filters.keys()
+    except:
+        message = 'Error occured while extracting filters dictionary keys.'
+        raise FunctionException(message)
     # query all books
     try:
         filtered_books = Book.query.all()

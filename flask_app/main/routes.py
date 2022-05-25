@@ -113,6 +113,8 @@ def configure_routes(app):
     def books_post():
         if request.method == 'POST':
             # process request into dictionary
+            print(type(request))
+            print(request)
             book_dict = request_to_dict(request)
             # create new book object and add to database
             new_book = Book(**book_dict)

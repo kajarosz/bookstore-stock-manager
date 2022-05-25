@@ -108,3 +108,44 @@ json_input_valid = {
 json_input_invalid = {
   "kind": "books#volumes",
   "totalItems": 197}
+
+class MockRequest:
+  def __init__(self, json):
+    self.json = json
+
+request_valid = MockRequest({
+        "acquired": 'true',
+        "authors": [
+            "Karolina Jarosz"
+        ],
+        "external_id": 'null',
+        "published_year": "2000",
+        "thumbnail": 'null',
+        "title": "Python is great!"
+    })
+
+request_invalid = 'invalid'
+
+class MockBookObject:
+  def __init__(self, _id, external_id, title, authors, acquired, published_year, thumbnail):
+    self._id = _id
+    self.external_id = external_id
+    self.title = title
+    self.authors = authors
+    self.acquired = acquired
+    self.published_year = published_year
+    self.thumbnail = thumbnail
+
+book_valid = MockBookObject(1, '123', 'Python is great!', 'Karolina Jarosz', True, '2020', None)
+
+book_invalid = 'invalid'
+
+filters_valid = {
+  "acquired": 'true',
+  "authors": "Karolina",
+  "from": "2000",
+  'to': '2020',
+  "title": "Python"
+}
+
+filters_invalid = {'store': 'invalid'}
