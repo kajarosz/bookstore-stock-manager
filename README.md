@@ -1,6 +1,6 @@
 ## bookstore-stock-manager
 
-Bookstore Stock Manager is Flask & SQLAlchemy based API designed to import books from Google Books API. Books database can ba managed with standard CRUD operations. App was deployed with Heroku - you can find it [HERE](https://bookstore-stock-manager.herokuapp.com/books).
+Bookstore Stock Manager is Flask & SQLAlchemy based REST API designed to import books from Google Books API. Books database can ba managed with standard CRUD operations. API accepts and returns data in JSON format. App was deployed with Heroku - you can find it [HERE](https://bookstore-stock-manager.herokuapp.com/books).
 
 
 ### How to access endpoints?
